@@ -23,6 +23,10 @@ const Login = ({classes}) => {
 				type: "LOGIN_USER",
 				payload: userData.me,
 			});
+			dispatch({
+				type: "IS_LOGGED_IN",
+				payload: googleUser.isSignedIn(),
+			});
 		} catch (err) {
 			onFailure(err);
 		}
