@@ -14,7 +14,7 @@ const Login = ({classes}) => {
 		try {
 			const idToken = googleUser.getAuthResponse().id_token;
 			// console.log(idToken);
-			const client = new GraphQLClient('http://localhost:4000/graphql', {
+			const client = new GraphQLClient(process.env.REACT_APP_API_URL, {
 				headers: {authorization: idToken}
 			});
 			const userData = await client.request(ME_QUERY); // возвращает промис
@@ -48,7 +48,7 @@ const Login = ({classes}) => {
 				Welcome
 			</Typography>
 			<GoogleLogin
-				clientId='604834729114-34ae5d58hnu31gfiej9bb6hjskm0qup7.apps.googleusercontent.com'
+				clientId={process.env.REACT_APP_GOGGLE_CLIENT_ID}
 				onSuccess={onSuccess}
 				onFailure={onFailure}
 				isSignedIn={true}
