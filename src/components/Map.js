@@ -1,12 +1,15 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useContext} from "react";
 import ReactMapGL, {NavigationControl, Marker} from 'react-map-gl';
 import {withStyles} from "@material-ui/core/styles";
 // import Button from "@material-ui/core/Button";
 // import Typography from "@material-ui/core/Typography";
 // import DeleteIcon from "@material-ui/icons/DeleteTwoTone";
 import PinIcon from './PinIcon';
+import Blog from './Blog';
+import Context from '../context';
 
 const Map = ({classes}) => {
+  const {state, dispatch} = useContext(Context);
   const [viewport, setViewport] = useState({
     latitude: 47.222078,
     longitude: 39.720349,
@@ -30,6 +33,19 @@ const Map = ({classes}) => {
     }
   };
 
+  const hadleMapClick = ({lngLat, leftButton}) => {
+    console.log(lngLat);
+    if (!leftButton);
+    if (!state.draft) {
+      dispatch({type: "CREATE_DRAFT"})
+    };
+    const [longitude, latitude] = lngLat;
+    dispatch({
+      type: "UPDATE_DRAFT_LOCATION",
+      payload: {longitude, latitude},
+    });
+  }
+
   return (
     <div className={classes.root}>
       <ReactMapGL
@@ -38,6 +54,7 @@ const Map = ({classes}) => {
         mapStyle="mapbox://styles/mapbox/streets-v9"
         mapboxApiAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
         onViewportChange={newViewport => setViewport(newViewport)}
+        onClick={hadleMapClick}
         {...viewport}
       >
         {/* NavControl */}
@@ -58,7 +75,22 @@ const Map = ({classes}) => {
             <PinIcon size={40} color="red" />
           </Marker>
         )}
+
+        {/* Draft Pin */}
+        {state.draft && (
+          <Marker
+            latitude={state.draft.latitude}
+            longitude={state.draft.longitude}
+            offsetLeft={-19}
+            offsetTop={-37}
+          >
+            <PinIcon size={40} color="blue" />
+          </Marker>
+        )}
       </ReactMapGL>
+
+      {/* Blog area for add data to pin */}
+      <Blog />
     </div>
   );
 };
