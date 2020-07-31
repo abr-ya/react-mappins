@@ -1,4 +1,5 @@
 import React, {useState, useContext} from "react";
+import {GraphQLClient} from 'graphql-request';
 import axios from 'axios';
 import {withStyles} from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
@@ -10,20 +11,35 @@ import ClearIcon from "@material-ui/icons/Clear";
 import SaveIcon from "@material-ui/icons/SaveTwoTone";
 
 import Context from '../../context';
+import {CREATE_PIN_MUTATION} from '../../graphql/mutations';
 
 const CreatePin = ({classes}) => {
-  const {dispatch} = useContext(Context);
+  const {dispatch, state} = useContext(Context);
   const [title, setTitle] = useState('');
   const [image, setImage] = useState('');
   const [content, setContent] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formSubmitHandler = async e => {
-    e.preventDefault();
-    setTitle('');
-    setImage('');
-    setContent('');
-    const url = await imageUpload();
-    console.log({title, url, content, image});
+    try {
+      e.preventDefault();
+      setIsSubmitting(true);
+      const idToken = window.gapi.auth2.getAuthInstance()
+        .currentUser.get().getAuthResponse().id_token;
+      const client = new GraphQLClient(process.env.REACT_APP_API_URL, {
+        headers: {authorization: idToken}
+      });
+      const url = await imageUpload();
+      const {latitude, longitude} = state.draft;
+      //console.log({title, url, content, image}); // тест до создания
+      const variables = {title, image: url, content, latitude, longitude};
+      const {createPin} = await client.request(CREATE_PIN_MUTATION, variables);
+      console.log("Pin created in DB", createPin);
+      deleteDraftHandler();
+    } catch (error) {
+      setIsSubmitting(false);
+      console.error("Error creating Pin", error);
+    }
   };
 
   const deleteDraftHandler = () => {
@@ -117,7 +133,7 @@ const CreatePin = ({classes}) => {
           className={classes.button}
           variant="contained"
           color="secondary"
-          disabled={!title.trim() || !content.trim()} // is image not required?!
+          disabled={!title.trim() || !content.trim() || isSubmitting} // is image not required?!
         >
           Submit
           <SaveIcon className={classes.rightIcon} />
