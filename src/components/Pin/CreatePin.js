@@ -40,7 +40,6 @@ const CreatePin = ({classes}) => {
   };
 
   const deleteDraftHandler = () => {
-    console.log('deleteDraftHandler');
     setTitle('');
     setImage('');
     setContent('');
@@ -48,7 +47,7 @@ const CreatePin = ({classes}) => {
   };
 
   const imageUpload = async () => {
-    let result = false;
+    let result = 'images/no-image.jpg';
     if (image) {
       const upURL = 'https://api.cloudinary.com/v1_1/abr/image/upload/';
       const data = new FormData();

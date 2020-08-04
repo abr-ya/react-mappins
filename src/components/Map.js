@@ -1,12 +1,14 @@
 import React, {useState, useEffect, useContext} from "react";
-import ReactMapGL, {NavigationControl, Marker} from 'react-map-gl';
+import ReactMapGL, {NavigationControl, Marker, Popup} from 'react-map-gl';
 import {withStyles} from "@material-ui/core/styles";
-// import Button from "@material-ui/core/Button";
-// import Typography from "@material-ui/core/Typography";
-// import DeleteIcon from "@material-ui/icons/DeleteTwoTone";
+import differenceInMinutes from 'date-fns/difference_in_minutes';
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
+import DeleteIcon from "@material-ui/icons/DeleteTwoTone";
 
 import {useClient} from '../client';
 import {GET_PINS_QUERY} from '../graphql/queries';
+import {DELETE_PIN_MUTATION} from '../graphql/mutations';
 import PinIcon from './PinIcon';
 import Blog from './Blog';
 import Context from '../context';
@@ -25,6 +27,7 @@ const Map = ({classes}) => {
     zoom: 13,
   });
   const [userPosition, setUserPosition] = useState(null);
+  const [popup, setPopup] = useState(null);
   
   useEffect(() => {
     getUserPosition();
@@ -48,9 +51,11 @@ const Map = ({classes}) => {
     }
   };
 
+  // клмк по карте - создаём черновик, закрываем попап, если есть
   const hadleMapClick = ({lngLat, leftButton}) => {
     console.log(lngLat);
-    if (!leftButton);
+    if (!leftButton) return false; // обрабатыаем только левую кнопку
+    setPopup(null); // добавил, чтобы закрывать попап если открыт
     if (!state.draft) {
       dispatch({type: "CREATE_DRAFT"})
     };
@@ -60,6 +65,30 @@ const Map = ({classes}) => {
       payload: {longitude, latitude},
     });
   }
+
+  const highlightNewPin = pin => {
+    const pinAge = differenceInMinutes(Date.now(), Number(pin.createdAt));
+    // console.log(pinAge); // выводим возраст метки
+    const isNewPin = pinAge < 60;
+    return isNewPin ? 'limegreen' : 'darkblue';
+  };
+
+  // пока не пойму, зачем мы сразу в 2 места отправляем пин...
+  const handleSelectPin = pin => {
+    console.log(pin);
+    setPopup(pin);
+    dispatch({type: "SET_PIN", payload: pin});
+  };
+
+  const isAuthUser = () => state.currentUser._id === popup.author._id;
+
+  const deleteButtonHandler = async pin => {
+    const variables = {pinId: pin._id};
+    const {deletePin} = await client.request(DELETE_PIN_MUTATION, variables);
+    console.log('метка удалена (null - что-то пошло не так!):', deletePin);
+    if (deletePin) dispatch({type: "DELETE_PIN", payload: deletePin});
+    setPopup(null);
+  };
 
   return (
     <div className={classes.root}>
@@ -112,9 +141,41 @@ const Map = ({classes}) => {
             offsetLeft={-19}
             offsetTop={-37}
           >
-            <PinIcon size={40} color="darkblue" />
+            <PinIcon
+              size={40}
+              color={highlightNewPin(pin)}
+              onClick={() => handleSelectPin(pin)}
+            />
           </Marker>          
         ))}
+
+        {/* Popup Dialog for Created Pins */}
+        {popup && (
+          <Popup
+            anchor='top'
+            latitude={popup.latitude}
+            longitude={popup.longitude}
+            closeOnClick={false}
+            onClose={() => setPopup(null)}
+          >
+            <img
+              className={classes.popupImage}
+              src={popup.image}
+              alt={popup.title}
+            />
+            <div className={classes.popupTab}>
+              <Typography>
+                {popup.latitude.toFixed(6)},
+                {popup.longitude.toFixed(6)},
+              </Typography>
+              {isAuthUser() && (
+                <Button onClick={() => deleteButtonHandler(popup)}>
+                  <DeleteIcon className={classes.deleteIcon} />
+                </Button>
+              )}
+            </div>
+          </Popup>
+        )}
       </ReactMapGL>
 
       {/* Blog area for add data to pin */}
