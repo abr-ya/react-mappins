@@ -63,6 +63,15 @@ export default function reducer(state, {type, payload}) {
 				pins: prevPins2,
 				currentPin: null,
 			}
+			case "CREATE_COMMENT":
+				const updatedPin = payload;
+				const newPins = state.pins
+					.map(pin => pin._id === updatedPin._id ? updatedPin : pin);
+				return {
+					...state,
+					pins: newPins,
+					currentPin: updatedPin,
+				}			
 		default:
 			return state;
 	}

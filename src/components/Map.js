@@ -51,7 +51,7 @@ const Map = ({classes}) => {
     }
   };
 
-  // клмк по карте - создаём черновик, закрываем попап, если есть
+  // клик по карте - создаём черновик, закрываем попап, если есть
   const hadleMapClick = ({lngLat, leftButton}) => {
     console.log(lngLat);
     if (!leftButton) return false; // обрабатыаем только левую кнопку
