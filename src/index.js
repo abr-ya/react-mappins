@@ -11,19 +11,38 @@ import reducer from "./reducer";
 import "mapbox-gl/dist/mapbox-gl.css";
 import * as serviceWorker from "./serviceWorker";
 
+import {ApolloProvider} from 'react-apollo';
+import {ApolloClient} from 'apollo-client';
+import {WebSocketLink} from 'apollo-link-ws';
+import {InMemoryCache} from 'apollo-cache-inmemory';
+
+const wsLink = new WebSocketLink({
+  uri: process.env.REACT_APP_WS_LINK,
+  options: {
+    reconnect: true,
+  }
+});
+
+const client = new ApolloClient({
+  link: wsLink,
+  cache: new InMemoryCache(),
+});
+
 const Root = () => {
   const initialState = useContext(Context);
   const [state, dispatch] = useReducer(reducer, initialState);
-  console.log(state);
+  // console.log(state); // здесь проверяем весь стейт!
 
   return (
     <Router>
-      <Context.Provider value={{state, dispatch}}>
-        <Switch>
-          <ProtectedRoute exact path="/" component={App} />
-          <Route path="/login" component={Splash} />
-        </Switch>        
-      </Context.Provider>
+      <ApolloProvider client={client}>
+        <Context.Provider value={{state, dispatch}}>
+          <Switch>
+            <ProtectedRoute exact path="/" component={App} />
+            <Route path="/login" component={Splash} />
+          </Switch>        
+        </Context.Provider>
+      </ApolloProvider>
     </Router>
   );
 };
