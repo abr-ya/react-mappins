@@ -31,7 +31,7 @@ const client = new ApolloClient({
 const Root = () => {
   const initialState = useContext(Context);
   const [state, dispatch] = useReducer(reducer, initialState);
-  // console.log(state); // здесь проверяем весь стейт!
+  console.log(state); // здесь проверяем весь стейт!
 
   return (
     <Router>

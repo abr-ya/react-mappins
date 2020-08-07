@@ -58,10 +58,16 @@ export default function reducer(state, {type, payload}) {
 			const deletedPin = payload;
 			const prevPins2 = state.pins
 				.filter(pin => pin._id !== deletedPin._id);
+			let newCurrentPin = state.currentPin;
+			// сбрасываем, если он существует и мы его удалили только что
+			if (newCurrentPin && deletedPin._id === newCurrentPin._id) {
+				console.log('id совпали');
+				newCurrentPin = null;
+			}
 			return {
 				...state,
 				pins: prevPins2,
-				currentPin: null,
+				currentPin: newCurrentPin,
 			}
 			case "CREATE_COMMENT":
 				const updatedPin = payload;

@@ -11,8 +11,8 @@ import Context from '../../context';
 
 const PinContent = ({classes}) => {
   const {state} = useContext(Context);
-  const {title, content, author, createdAt, comments} = state.currentPin; // !! оптимизировать
-  console.log(comments);
+  const {title, content, author, createdAt, comments} = state.currentPin; // !! оптимизировать?
+  // console.log(comments); // проверить комментарии
 
   return (
     <div className={classes.root}>

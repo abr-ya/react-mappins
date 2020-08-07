@@ -5,6 +5,7 @@ import differenceInMinutes from 'date-fns/difference_in_minutes';
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import DeleteIcon from "@material-ui/icons/DeleteTwoTone";
+import {unstable_useMediaQuery as useMediaQuery} from '@material-ui/core/useMediaQuery';
 import {Subscription} from 'react-apollo';
 
 import {useClient} from '../client';
@@ -21,6 +22,7 @@ import Context from '../context';
 
 const Map = ({classes}) => {
   const client = useClient();
+  const isMobile = useMediaQuery('(max-width:650px)');
   const {state, dispatch} = useContext(Context);
   
   useEffect(() => {
@@ -93,16 +95,16 @@ const Map = ({classes}) => {
     const {deletePin} = await client.request(DELETE_PIN_MUTATION, variables);
     console.log('метка удалена (null - что-то пошло не так!):', deletePin);
     //if (deletePin) dispatch({type: "DELETE_PIN", payload: deletePin});
-    setPopup(null);
   };
 
   return (
-    <div className={classes.root}>
+    <div className={isMobile ? classes.rootMobile : classes.root}>
       <ReactMapGL
         width="100vw"
         height="calc(100vh - 64px)"
         mapStyle="mapbox://styles/mapbox/streets-v9"
         mapboxApiAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
+        scrollZoom={!isMobile}
         onViewportChange={newViewport => setViewport(newViewport)}
         onClick={hadleMapClick}
         {...viewport}
@@ -206,6 +208,7 @@ const Map = ({classes}) => {
         onSubscriptionData={({subscriptionData}) => {
           const {pinDeleted} = subscriptionData.data;
           console.log('Subs! - pinDeleted', pinDeleted);
+          setPopup(null);
           dispatch({type: "DELETE_PIN", payload: pinDeleted});
         }}
       />
