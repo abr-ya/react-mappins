@@ -6,16 +6,16 @@ import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import DeleteIcon from "@material-ui/icons/DeleteTwoTone";
 import {unstable_useMediaQuery as useMediaQuery} from '@material-ui/core/useMediaQuery';
-import {Subscription} from 'react-apollo';
+// import {Subscription} from 'react-apollo';
 
 import {useClient} from '../client';
 import {GET_PINS_QUERY} from '../graphql/queries';
 import {DELETE_PIN_MUTATION} from '../graphql/mutations';
-import {
-  PIN_ADDED_SUBSCRIPTION,
-  PIN_UPDATED_SUBSCRIPTION,
-  PIN_DELETED_SUBSCRIPTION
-} from '../graphql/subscriptions';
+// import {
+//   PIN_ADDED_SUBSCRIPTION,
+//   PIN_UPDATED_SUBSCRIPTION,
+//   PIN_DELETED_SUBSCRIPTION
+// } from '../graphql/subscriptions';
 import PinIcon from './PinIcon';
 import Blog from './Blog';
 import Context from '../context';
@@ -187,7 +187,7 @@ const Map = ({classes}) => {
       </ReactMapGL>
 
       {/* Subscriptions for Creating / Updating / Deleting Pin */}
-      <Subscription
+      {/* <Subscription
         subscription={PIN_ADDED_SUBSCRIPTION}
         onSubscriptionData={({subscriptionData}) => {
           const {pinAdded} = subscriptionData.data;
@@ -211,7 +211,7 @@ const Map = ({classes}) => {
           setPopup(null);
           dispatch({type: "DELETE_PIN", payload: pinDeleted});
         }}
-      />
+      /> */}
 
       {/* Blog area for add data to pin */}
       <Blog />
